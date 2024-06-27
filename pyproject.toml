@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tdd-toolbox"
+version = "0.0.1"
+authors = [{ name = "Thinh Do Duc", email = "dothinh.dev@gmail.com" }]
+maintainers = [{ name = "Thinh Do Duc", email = "dothinh.dev@gmail.com" }]
+description = "A Shopee Python wrapper"
+readme = "README.md"
+requires-python = ">=3.11.8"
+dependencies = [
+    "mysql_connector_repackaged==0.3.1",
+    "setuptools==65.5.0"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/ducthinh-dev/tdd_toolbox"
+Issues = "https://github.com/ducthinh-dev/tdd_toolbox/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tdd"]
