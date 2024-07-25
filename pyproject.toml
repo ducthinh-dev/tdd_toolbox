@@ -7,7 +7,7 @@ name = "tdd-toolbox"
 version = "0.0.1"
 authors = [{ name = "Thinh Do Duc", email = "dothinh.dev@gmail.com" }]
 maintainers = [{ name = "Thinh Do Duc", email = "dothinh.dev@gmail.com" }]
-description = "A Shopee Python wrapper"
+description = "Duc Thinh's essential tools for projects"
 readme = "README.md"
 requires-python = ">=3.11.8"
 dependencies = [
