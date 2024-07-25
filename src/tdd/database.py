@@ -17,12 +17,13 @@ class MysqlConnector:
         self.__DATABASE_PASSWORD = password
         self.__DATABASE_SCHEMA = database
         self.__connection = self.__establish_connection()
+        self.__PORT = port
 
     def __establish_connection(self):
         connection = MySQLConnection(user=self.__DATABASE_USER,
                                      password=self.__DATABASE_PASSWORD,
                                      host=self.__DATABASE_HOST,
-                                     port=3306,
+                                     port=self.__PORT,
                                      database=self.__DATABASE_SCHEMA)
         return connection
 
