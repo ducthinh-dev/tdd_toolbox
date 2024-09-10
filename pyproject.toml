@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tdd-toolbox"
-version = "0.0.2"
+version = "0.1.0"
 authors = [{ name = "Thinh Do Duc", email = "dothinh.dev@gmail.com" }]
 maintainers = [{ name = "Thinh Do Duc", email = "dothinh.dev@gmail.com" }]
 description = "Duc Thinh's essential tools for projects"
@@ -25,4 +25,4 @@ Homepage = "https://github.com/ducthinh-dev/tdd_toolbox"
 Issues = "https://github.com/ducthinh-dev/tdd_toolbox/issues"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/tdd"]
+packages = ["src/tools"]
