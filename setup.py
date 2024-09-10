@@ -5,7 +5,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='tdd-toolbox',
-    version='0.1.0',
+    version='0.1.1',
     packages=find_packages(exclude=['tests*']),
     license='MIT',
     description='Duc Thinh\'s essential tools for projects',
