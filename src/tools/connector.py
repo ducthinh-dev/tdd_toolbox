@@ -132,9 +132,9 @@ class Connector:
         try:
             for idx, item in enumerate(data):
                 if type(item[1]) is str:
-                    data[idx] = (item[0], f"'{item[1]}'")
                     if "'" in item[1]:
                         data[idx] = (item[0], item[1].replace("'", ""))
+                    data[idx] = (item[0], f"'{item[1]}'")
 
             update_value = [f"{item[0]} = {item[1]}" for item in data]
             statement = (
