@@ -17,7 +17,9 @@ class Connector:
         self.__DATABASE_SCHEMA = schema
         self.__connection = self.__establish_connection()
 
-    def __establish_connection(self):
+    def __establish_connection(self, is_init = True):
+        if not is_init:
+            self.__connection.close()
         connection = MySQLConnection(
             user=self.__DATABASE_USER,
             password=self.__DATABASE_PASSWORD,
@@ -29,7 +31,7 @@ class Connector:
         return connection
 
     def refresh_connection(self):
-        self.__connection = self.__establish_connection()
+        self.__connection = self.__establish_connection(is_init=False)
 
     def close_connection(self):
         self.__connection.close()
@@ -103,6 +105,7 @@ class Connector:
             result = []
             for item in cursor.stored_results():
                 result.append((item.column_names, item.fetchall()))
+        self.refresh_connection()
         return result
 
     def insert_data_(self, table: str, data: list, column_names: list):
