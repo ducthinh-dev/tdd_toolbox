@@ -40,7 +40,7 @@ class Connector:
         return f"mysql+mysqlconnector://{self.__DATABASE_USER}:{self.__DATABASE_PASSWORD}@{self.__DATABASE_HOST}/{self.__DATABASE_SCHEMA}"
 
     @staticmethod
-    def handle_conditions(conditions: list = []):
+    def handle_conditions(conditions: list = [], is_or: bool = True):
         """
         conditions: [
             {
@@ -67,7 +67,8 @@ class Connector:
                 value = item["value"]
                 item["value"] = f"'{value}'"
 
-        con_str = " OR ".join(
+        con_op = "OR" if is_or else "AND"
+        con_str = f" {con_op} ".join(
             [f"{con['column']} {ops[con['operator']]} {con['value']}" for con in conditions])
         return "WHERE " + con_str
 
@@ -175,7 +176,7 @@ class Connector:
                     updates[idx] = (item[0], f"'{value}'")
 
             update_value = [f"{item[0]} = {item[1]}" for item in updates]
-            con_str = self.handle_conditions(conditions)
+            con_str = self.handle_conditions(conditions, is_or=False)
             statement = (
                 f"UPDATE {table} "
                 f"SET {', '.join(update_value)} "
