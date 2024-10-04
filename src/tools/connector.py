@@ -181,6 +181,9 @@ class Connector:
                 f"SET {', '.join(update_value)} "
                 f"{con_str};"
             )
+            with self.__connection.cursor() as cursor:
+                cursor.execute(statement)
+                self.__connection.commit()
         except connector.Error as error:
             print(error,
                   sep="\n")
