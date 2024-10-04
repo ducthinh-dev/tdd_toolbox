@@ -1,3 +1,4 @@
 .env
 *.ipynb
 toolbox.code-workspace
+__pycache__/
