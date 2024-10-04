@@ -17,7 +17,7 @@ class Connector:
         self.__DATABASE_SCHEMA = schema
         self.__connection = self.__establish_connection()
 
-    def __establish_connection(self, is_init = True):
+    def __establish_connection(self, is_init=True):
         if not is_init:
             self.__connection.close()
         connection = MySQLConnection(
@@ -153,6 +153,39 @@ class Connector:
             print(error,
                   sep="\n")
             return statement
+
+    def update_multiple(self, table: str, conditions: list[dict], updates: list[tuple]):
+        """
+        conditions:
+        ```
+        [
+            {
+                "column": column_name,
+                "value": value,
+                "operator": operator
+            }, ...
+        ]
+        ```
+        operator list: `eq`: `=`, `gt`: `>`, `lt`: `<`, `gq`: `>=`, `lq`: `<=`, `ne`: `!=`
+        """
+        try:
+            for idx, item in enumerate(updates):
+                if type(item[1]) is str:
+                    value = item[1].replace("'", "")
+                    updates[idx] = (item[0], f"'{value}'")
+
+            update_value = [f"{item[0]} = {item[1]}" for item in updates]
+            con_str = self.handle_conditions(conditions)
+            statement = (
+                f"UPDATE {table} "
+                f"SET {', '.join(update_value)} "
+                f"{con_str};"
+            )
+        except connector.Error as error:
+            print(error,
+                  sep="\n")
+            return statement
+        return
 
     def delete_data(self, table: str, conditions: list[dict] = []):
         """
