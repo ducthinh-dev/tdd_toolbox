@@ -1,3 +1,3 @@
-from .database import MysqlConnector
-from .connector import Connector
+from .database import *
+from .connector import *
 from .downloader import *
