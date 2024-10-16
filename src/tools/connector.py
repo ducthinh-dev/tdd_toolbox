@@ -81,6 +81,7 @@ class Connector:
                 cursor.execute(query)
                 raw_data = cursor.fetchall()
                 raw_columns = cursor.column_names
+                self.__connection.commit()
             return (raw_columns, raw_data)
         except connector.Error as error:
             # print(f"Oh no, {error}.")
