@@ -106,6 +106,7 @@ class Connector:
             result = []
             for item in cursor.stored_results():
                 result.append((item.column_names, item.fetchall()))
+            cursor.commit()
         self.refresh_connection()
         return result
 
