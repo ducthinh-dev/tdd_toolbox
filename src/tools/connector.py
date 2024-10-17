@@ -148,7 +148,7 @@ class Connector:
             statement = (
                 f"/*{self.__user}*/ "
                 f"UPDATE {table} "
-                f"SET {', '.join(update_value)} "
+                f"SET {', '.join(update_value)} ".replace('None', 'NULL')
                 f"WHERE {column} = '{row_value}';"
             )
             with self.__connection.cursor() as cursor:
@@ -185,7 +185,7 @@ class Connector:
             statement = (
                 f"/*{self.__user}*/ "
                 f"UPDATE {table} "
-                f"SET {', '.join(update_value)} "
+                f"SET {', '.join(update_value)} ".replace('None', 'NULL')
                 f"{con_str};"
             )
             with self.__connection.cursor() as cursor:
