@@ -145,10 +145,12 @@ class Connector:
                     # data[idx] = (item[0], f"'{item[1]}'")
 
             update_value = [f"{item[0]} = {item[1]}" for item in data]
+            update_value = [value.replace('None', 'NULL')
+                            for value in update_value]
             statement = (
                 f"/*{self.__user}*/ "
                 f"UPDATE {table} "
-                f"SET {', '.join(update_value)} ".replace('None', 'NULL')
+                f"SET {', '.join(update_value)} "
                 f"WHERE {column} = '{row_value}';"
             )
             with self.__connection.cursor() as cursor:
@@ -181,11 +183,13 @@ class Connector:
                     updates[idx] = (item[0], f"'{value}'")
 
             update_value = [f"{item[0]} = {item[1]}" for item in updates]
+            update_value = [value.replace('None', 'NULL')
+                            for value in update_value]
             con_str = self.handle_conditions(conditions, is_or=False)
             statement = (
                 f"/*{self.__user}*/ "
                 f"UPDATE {table} "
-                f"SET {', '.join(update_value)} ".replace('None', 'NULL')
+                f"SET {', '.join(update_value)} "
                 f"{con_str};"
             )
             with self.__connection.cursor() as cursor:
