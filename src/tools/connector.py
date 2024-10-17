@@ -9,13 +9,15 @@ class Connector:
         host,
         username,
         password,
-        schema
+        schema,
+        user: str = 'tools.Connector'
     ) -> None:
         self.__DATABASE_HOST = host
         self.__DATABASE_USER = username
         self.__DATABASE_PASSWORD = password
         self.__DATABASE_SCHEMA = schema
         self.__connection = self.__establish_connection()
+        self.__user = user
 
     def __establish_connection(self, is_init=True):
         if not is_init:
@@ -78,7 +80,7 @@ class Connector:
         """
         try:
             with self.__connection.cursor(buffered=True) as cursor:
-                cursor.execute(query)
+                cursor.execute(f'/*{self.__user}*/ ' + query)
                 raw_data = cursor.fetchall()
                 raw_columns = cursor.column_names
                 self.__connection.commit()
@@ -117,7 +119,7 @@ class Connector:
             columns_len = len(column_names)
             values_marker = "%s"
             statement = (
-                f"INSERT INTO {table} "
+                f"/*{self.__user}*/ INSERT INTO {table} "
                 f"({columns}) "
                 f"VALUES ({', '.join([values_marker] * columns_len)})"
             )
@@ -144,6 +146,7 @@ class Connector:
 
             update_value = [f"{item[0]} = {item[1]}" for item in data]
             statement = (
+                f"/*{self.__user}*/ "
                 f"UPDATE {table} "
                 f"SET {', '.join(update_value)} "
                 f"WHERE {column} = '{row_value}';"
@@ -180,6 +183,7 @@ class Connector:
             update_value = [f"{item[0]} = {item[1]}" for item in updates]
             con_str = self.handle_conditions(conditions, is_or=False)
             statement = (
+                f"/*{self.__user}*/ "
                 f"UPDATE {table} "
                 f"SET {', '.join(update_value)} "
                 f"{con_str};"
@@ -209,7 +213,7 @@ class Connector:
         """
         try:
             con_str = self.handle_conditions(conditions)
-            statement = f"DELETE FROM {table} {con_str};"
+            statement = f"/*{self.__user}*/ DELETE FROM {table} {con_str};"
             with self.__connection.cursor() as cursor:
                 cursor.execute(statement)
                 self.__connection.commit()
