@@ -135,7 +135,7 @@ class Connector:
         try:
             for idx, item in enumerate(data):
                 if type(item[1]) is str:
-                    value = item[1].replace("'", "\\'")
+                    value = item[1].replace("'", "\\\'")
                     data[idx] = (item[0], f"'{value}'")
 
             update_value = [f"{item[0]} = {item[1]}" for item in data]
@@ -174,7 +174,7 @@ class Connector:
         try:
             for idx, item in enumerate(updates):
                 if type(item[1]) is str:
-                    value = item[1].replace("'", "\\'")
+                    value = item[1].replace("'", "\\\'")
                     updates[idx] = (item[0], f"'{value}'")
 
             update_value = [f"{item[0]} = {item[1]}" for item in updates]
