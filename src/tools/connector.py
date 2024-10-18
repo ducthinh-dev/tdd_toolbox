@@ -76,7 +76,7 @@ class Connector:
 
         for item in conditions:
             if type(item["value"]) is str:
-                value = item["value"]
+                value = item["value"].replace("'", "\\\'")
                 item["value"] = f"'{value}'"
 
         con_op = "OR" if is_or else "AND"
@@ -135,9 +135,8 @@ class Connector:
         try:
             for idx, item in enumerate(data):
                 if type(item[1]) is str:
-                    value = item[1].replace("'", "")
+                    value = item[1].replace("'", "\\'")
                     data[idx] = (item[0], f"'{value}'")
-                    # data[idx] = (item[0], f"'{item[1]}'")
 
             update_value = [f"{item[0]} = {item[1]}" for item in data]
             update_value = [value.replace('None', 'NULL')
@@ -175,7 +174,7 @@ class Connector:
         try:
             for idx, item in enumerate(updates):
                 if type(item[1]) is str:
-                    value = item[1].replace("'", "")
+                    value = item[1].replace("'", "\\'")
                     updates[idx] = (item[0], f"'{value}'")
 
             update_value = [f"{item[0]} = {item[1]}" for item in updates]
@@ -235,6 +234,7 @@ class Connector:
 
             match this_type:
                 case 'str':
+                    this_value = this_value.replace("'", "\\\'")
                     this_value = f"'{this_value}'"
                 case 'float':
                     this_value = float(this_value)
