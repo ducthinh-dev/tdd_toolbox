@@ -227,7 +227,7 @@ class Connector:
     def _convert_type(types: list[str], values: tuple):
         results = []
         for this_type, this_value in zip(types, values):
-            if not this_value:
+            if this_value == None:
                 this_value = 'null'
                 results.append(this_value)
                 continue
