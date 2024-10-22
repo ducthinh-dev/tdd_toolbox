@@ -19,6 +19,8 @@ class Downloader:
         '''
         store_path = store_path if store_path[-1] == '/' else store_path + '/'
         self.storage = store_path
+        if not os.path.exists(self.storage):
+            os.mkdir(self.storage)
 
     async def get(self, url: str, name: str = None, is_overwritten: bool = False):
         '''
