@@ -234,7 +234,7 @@ class Connector:
 
             match this_type:
                 case 'str':
-                    this_value = this_value.replace("'", "&apos;")
+                    this_value = str(this_value).replace("'", "&apos;")
                     this_value = f"'{this_value}'"
                 case 'float':
                     this_value = float(this_value)
@@ -252,7 +252,7 @@ class Connector:
         statement = f"/* {self.__user} */ describe {table};"
         return self.query_data(statement)
 
-    def insert(self, table: str, columns: dict, values: list[tuple]):
+    def insert(self, table: str, columns: dict, values: list[tuple], new_col: bool = False):
         """
         Insert data into the specified table.
 
@@ -287,13 +287,31 @@ class Connector:
         for idx, row in enumerate(values):
             if len(row) != columns_len:
                 raise ValueError(
-                    f'Index {idx} length ({len(row)}) does not match length of columns ({columns_len}).')
+                    f'Index {idx}\'s length ({len(row)}) does not match length of columns ({columns_len}).')
 
         _, table_describe = self.describe(table=table)
         table_dtype = dict([row[:2] for row in table_describe])
+
+        # CHECK REQUIRED COLUMN
+        table_req = [row[0] for row in table_describe if row[2] == 'NO']
+        cols_missing = [col for col in table_req if col not in columns]
+        if cols_missing:
+            raise KeyError(f'Missing not null columns: {cols_missing}.')
+
+        # CHECK DIFFERENCE BETWEEN PROVIDED COLUMNS WITH TABLE COLUMNS
         cols_diff = list(set(columns).difference(set(table_dtype.keys())))
         if cols_diff:
-            raise KeyError(f'Columns are not in {table}: {str(cols_diff)}')
+            if not new_col:
+                raise KeyError(f'Columns are not in {table}: {str(cols_diff)}')
+            else:
+                for col in cols_diff:
+                    self.add_column(
+                        table=table,
+                        name=col,
+                        ctype='text'
+                    )
+                _, table_describe = self.describe(table=table)
+                table_dtype = dict([row[:2] for row in table_describe])
 
         type_list = [self.type_dict[table_dtype[col_name]]
                      for col_name in columns]
@@ -314,3 +332,19 @@ class Connector:
             self.__connection.rollback()
             raise Exception(error, statement, sep="\n")
         return len(values)
+
+    def add_column(self, table: str, name: str, ctype: str):
+        try:
+            statement = (
+                f"/* {self.__user} */ "
+                f"alter table {table} "
+                f"add {name} {ctype} null ;"
+            )
+            with self.__connection.cursor() as cursor:
+                cursor.execute(statement)
+                self.__connection.commit()
+            return True
+        except Exception as error:
+            self.__connection.rollback()
+            print(error, statement, sep="\n")
+            return False
