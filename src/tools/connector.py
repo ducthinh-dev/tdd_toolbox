@@ -133,22 +133,17 @@ class Connector:
             data: list[tuple]
     ):
         try:
-            for idx, item in enumerate(data):
-                if type(item[1]) is str:
-                    value = item[1].replace("'", "&apos;")
-                    data[idx] = (item[0], f"'{value}'")
+            update_cols = [update[0] for update in data]
+            update_value = [update[1] for update in data]
 
-            update_value = [f"{item[0]} = {item[1]}" for item in data]
-            update_value = [value.replace('None', 'NULL')
-                            for value in update_value]
             statement = (
                 f"/* {self.__user} */ "
                 f"UPDATE {table} "
-                f"SET {', '.join(update_value)} "
+                f"SET {self._make_update(update_cols)} "
                 f"WHERE {column} = '{row_value}';"
             )
             with self.__connection.cursor() as cursor:
-                cursor.execute(statement)
+                cursor.execute(statement, update_value)
                 self.__connection.commit()
             return True
         except connector.Error as error:
@@ -177,15 +172,6 @@ class Connector:
         operator list: `eq`: `=`, `gt`: `>`, `lt`: `<`, `gq`: `>=`, `lq`: `<=`, `ne`: `!=`
         """
         try:
-            for idx, item in enumerate(updates):
-                if type(item[1]) is str:
-                    value = item[1].replace("'", "&apos;")
-                    updates[idx] = (item[0], f"'{value}'")
-
-            # update_value = [f"{item[0]} = {item[1]}" for item in updates]
-            # update_value = [value.replace('None', 'NULL')
-            #                 for value in update_value]
-
             update_cols = [update[0] for update in updates]
             update_value = [update[1] for update in updates]
 
