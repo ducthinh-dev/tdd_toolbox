@@ -157,6 +157,11 @@ class Connector:
                   sep="\n")
             return statement
 
+    @staticmethod
+    def _make_update(col_list: list[str]):
+        result = ' = %s , '.join(col_list) + ' = %s'
+        return result
+
     def update_multiple(self, table: str, conditions: list[dict], updates: list[tuple]):
         """
         conditions:
@@ -177,18 +182,22 @@ class Connector:
                     value = item[1].replace("'", "&apos;")
                     updates[idx] = (item[0], f"'{value}'")
 
-            update_value = [f"{item[0]} = {item[1]}" for item in updates]
-            update_value = [value.replace('None', 'NULL')
-                            for value in update_value]
+            # update_value = [f"{item[0]} = {item[1]}" for item in updates]
+            # update_value = [value.replace('None', 'NULL')
+            #                 for value in update_value]
+
+            update_cols = [update[0] for update in updates]
+            update_value = [update[1] for update in updates]
+
             con_str = self.handle_conditions(conditions, is_or=False)
             statement = (
                 f"/* {self.__user} */ "
                 f"UPDATE {table} "
-                f"SET {', '.join(update_value)} "
+                f"SET {self._make_update(update_cols)} "
                 f"{con_str};"
             )
             with self.__connection.cursor() as cursor:
-                cursor.execute(statement)
+                cursor.execute(statement, update_value)
                 self.__connection.commit()
         except connector.Error as error:
             self.__connection.rollback()
@@ -252,6 +261,10 @@ class Connector:
         statement = f"/* {self.__user} */ describe {table};"
         return self.query_data(statement)
 
+    @staticmethod
+    def _make_ph(num: int):
+        return '(' + ', '.join(['%s']*num) + ')'
+
     def insert(self, table: str, columns: dict, values: list[tuple], new_col: bool = False):
         """
         Insert data into the specified table.
@@ -313,24 +326,24 @@ class Connector:
                 _, table_describe = self.describe(table=table)
                 table_dtype = dict([row[:2] for row in table_describe])
 
-        type_list = [self.type_dict[table_dtype[col_name]]
-                     for col_name in columns]
-        values = self._adapt_type(types=type_list, values=values)
+        # type_list = [self.type_dict[table_dtype[col_name]]
+        #              for col_name in columns]
+        # values = self._adapt_type(types=type_list, values=values)
 
         statement = (
             f"/* {self.__user} */ "
             f"insert into {table} "
             f"({', '.join(columns)}) "
             f"values "
-            f"{', '.join(['(' + ', '.join([str(value) for value in row]) + ')' for row in values])} ;"
+            f"{self._make_ph(len(columns))};"
         )
         try:
             with self.__connection.cursor() as cursor:
-                cursor.execute(statement)
+                cursor.executemany(statement, seq_params=values)
                 self.__connection.commit()
         except Exception as error:
             self.__connection.rollback()
-            raise Exception(error, statement, sep="\n")
+            print(error, statement, sep='\n')
         return len(values)
 
     def add_column(self, table: str, name: str, ctype: str):
