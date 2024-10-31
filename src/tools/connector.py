@@ -229,8 +229,9 @@ class Connector:
 
             match this_type:
                 case 'str':
-                    this_value = str(this_value).replace("'", "&apos;")
-                    this_value = f"'{this_value}'"
+                    this_value = str(this_value)
+                    # .replace("'", "&apos;")
+                    # this_value = f"'{this_value}'"
                 case 'float':
                     this_value = float(this_value)
                 case 'int':
