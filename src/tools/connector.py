@@ -312,9 +312,9 @@ class Connector:
                 _, table_describe = self.describe(table=table)
                 table_dtype = dict([row[:2] for row in table_describe])
 
-        # type_list = [self.type_dict[table_dtype[col_name]]
-        #              for col_name in columns]
-        # values = self._adapt_type(types=type_list, values=values)
+        type_list = [self.type_dict[table_dtype[col_name]]
+                     for col_name in columns]
+        values = self._adapt_type(types=type_list, values=values)
 
         statement = (
             f"/* {self.__user} */ "
