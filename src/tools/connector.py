@@ -86,7 +86,7 @@ class Connector:
             [f"{con['column']} {ops[con['operator']]} {con['value']}" for con in conditions])
         return "WHERE " + con_str
 
-    def query_data(self, query: str, params: list):
+    def query_data(self, query: str, params: list = []):
         """
         #### Return: 
         `columns, data`
