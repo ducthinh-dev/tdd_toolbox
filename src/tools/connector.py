@@ -6,7 +6,9 @@ class Connector:
     type_dict = {
         'text': 'str',
         'varchar(10)': 'str',
+        'varchar(25)': 'str',
         'varchar(50)': 'str',
+        'varchar(100)': 'str',
         'datetime': 'str',
         'timestamp': 'str',
         'double': 'float',
@@ -76,7 +78,7 @@ class Connector:
 
         for item in conditions:
             if type(item["value"]) is str:
-                value = item["value"].replace("'", "&apos;")
+                value = item["value"].replace("'", "\'")
                 item["value"] = f"'{value}'"
 
         con_op = "OR" if is_or else "AND"
@@ -84,14 +86,14 @@ class Connector:
             [f"{con['column']} {ops[con['operator']]} {con['value']}" for con in conditions])
         return "WHERE " + con_str
 
-    def query_data(self, query: str):
+    def query_data(self, query: str, params: list):
         """
         #### Return: 
         `columns, data`
         """
         try:
             with self.__connection.cursor(buffered=True) as cursor:
-                cursor.execute(f'/* {self.__user} */ ' + query)
+                cursor.execute(f'/* {self.__user} */ ' + query, params=params)
                 raw_data = cursor.fetchall()
                 raw_columns = cursor.column_names
                 self.__connection.commit()
