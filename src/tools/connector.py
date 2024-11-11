@@ -225,7 +225,7 @@ class Connector:
         results = []
         for this_type, this_value in zip(types, values):
             if this_value == None:
-                this_value = 'null'
+                # this_value = 'null'
                 results.append(this_value)
                 continue
 
