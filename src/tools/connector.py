@@ -28,7 +28,7 @@ class Connector:
         self.__DATABASE_SCHEMA = schema
         self.__connection = self.__establish_connection()
         self.__user = user
-        self.type_dict.update(dict(zip([f'vachar({i})' for i in range(
+        self.type_dict.update(dict(zip([f'varchar({i})' for i in range(
             1, self.MAX_VARCHAR + 1)], ['str'] * self.MAX_VARCHAR)))
 
     def __establish_connection(self, is_init=True):
