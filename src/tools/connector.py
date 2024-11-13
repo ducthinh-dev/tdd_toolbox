@@ -3,12 +3,10 @@ from mysql.connector import MySQLConnection
 
 
 class Connector:
+    MAX_VARCHAR = 1000
+
     type_dict = {
         'text': 'str',
-        'varchar(10)': 'str',
-        'varchar(25)': 'str',
-        'varchar(50)': 'str',
-        'varchar(100)': 'str',
         'datetime': 'str',
         'timestamp': 'str',
         'double': 'float',
@@ -30,6 +28,8 @@ class Connector:
         self.__DATABASE_SCHEMA = schema
         self.__connection = self.__establish_connection()
         self.__user = user
+        self.type_dict.update(dict(zip([f'vachar({i})' for i in range(
+            1, self.MAX_VARCHAR + 1)], ['str'] * self.MAX_VARCHAR)))
 
     def __establish_connection(self, is_init=True):
         if not is_init:
