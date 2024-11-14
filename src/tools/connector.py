@@ -10,6 +10,7 @@ class Connector:
         'datetime': 'str',
         'timestamp': 'str',
         'double': 'float',
+        'tinyint': 'int',
         'int': 'int',
         'bigint': 'int',
     }
