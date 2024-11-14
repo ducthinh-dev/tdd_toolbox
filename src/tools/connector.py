@@ -350,3 +350,84 @@ class Connector:
             self.__connection.rollback()
             print(error, statement, sep="\n")
             return False
+
+    def replace(self, table: str, columns: dict, values: list[tuple], new_col: bool = False):
+        """
+        Replace data into the specified table.
+
+        Args:
+            table (str): The name of the table to replace data into.
+            columns (dict): A dictionary where keys are column names and values are data types.
+            values (list[tuple]): A list of tuples where each tuple represents a row of data to be replaced.
+
+        Returns:
+            int: The number of rows replaced.
+
+        Raises:
+            KeyError: If columns in the data to be replaced do not match the table columns.
+            ValueError: If length of a row does not match the length of column list.
+
+        Example:
+            ```
+            cols = ['first_col', 'second_col']
+            values = [('70', 2123.3), ('80', 123)]
+            Connector.replace(
+                table='TableName',
+                columns=cols,
+                values=values
+            )
+            >>> 2
+            ```
+        """
+        if not values:
+            return 0
+
+        columns_len = len(columns)
+        for idx, row in enumerate(values):
+            if len(row) != columns_len:
+                raise ValueError(
+                    f'Index {idx}\'s length ({len(row)}) does not match length of columns ({columns_len}).')
+
+        _, table_describe = self.describe(table=table)
+        table_dtype = dict([row[:2] for row in table_describe])
+
+        # CHECK REQUIRED COLUMN
+        table_req = [row[0] for row in table_describe if row[2] == 'NO']
+        cols_missing = [col for col in table_req if col not in columns]
+        if cols_missing:
+            raise KeyError(f'Missing not null columns: {cols_missing}.')
+
+        # CHECK DIFFERENCE BETWEEN PROVIDED COLUMNS WITH TABLE COLUMNS
+        cols_diff = list(set(columns).difference(set(table_dtype.keys())))
+        if cols_diff:
+            if not new_col:
+                raise KeyError(f'Columns are not in {table}: {str(cols_diff)}')
+            else:
+                for col in cols_diff:
+                    self.add_column(
+                        table=table,
+                        name=col,
+                        ctype='text'
+                    )
+                _, table_describe = self.describe(table=table)
+                table_dtype = dict([row[:2] for row in table_describe])
+
+        type_list = [self.type_dict[table_dtype[col_name]]
+                     for col_name in columns]
+        values = self._adapt_type(types=type_list, values=values)
+
+        statement = (
+            f"/* {self.__user} */ "
+            f"replace into {table} "
+            f"({', '.join(columns)}) "
+            f"values "
+            f"{self._make_ph(len(columns))};"
+        )
+        try:
+            with self.__connection.cursor() as cursor:
+                cursor.executemany(statement, seq_params=values)
+                self.__connection.commit()
+        except Exception as error:
+            self.__connection.rollback()
+            print(error, statement, sep='\n')
+        return len(values)
