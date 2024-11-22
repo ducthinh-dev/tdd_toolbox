@@ -255,7 +255,7 @@ class Connector:
     def _make_ph(num: int):
         return '(' + ', '.join(['%s']*num) + ')'
 
-    def insert(self, table: str, columns: dict, values: list[tuple], new_col: bool = False):
+    def insert(self, table: str, columns: dict, values: list[tuple], new_col: bool = False, do_replace: bool = False):
         """
         Insert data into the specified table.
 
@@ -296,7 +296,8 @@ class Connector:
         table_dtype = dict([row[:2] for row in table_describe])
 
         # CHECK REQUIRED COLUMN
-        table_req = [row[0] for row in table_describe if row[2] == 'NO']
+        table_req = [row[0] for row in table_describe if row[2]
+                     == 'NO' and 'auto_increment' not in row[5]]
         cols_missing = [col for col in table_req if col not in columns]
         if cols_missing:
             raise KeyError(f'Missing not null columns: {cols_missing}.')
@@ -320,9 +321,10 @@ class Connector:
                      for col_name in columns]
         values = self._adapt_type(types=type_list, values=values)
 
+        used_statement = 'replace' if do_replace else 'insert'
         statement = (
             f"/* {self.__user} */ "
-            f"insert into {table} "
+            f"{used_statement} into {table} "
             f"({', '.join(columns)}) "
             f"values "
             f"{self._make_ph(len(columns))};"
