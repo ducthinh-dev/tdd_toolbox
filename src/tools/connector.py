@@ -21,7 +21,8 @@ class Connector:
         username,
         password,
         schema,
-        user: str = 'tools.Connector'
+        user: str = 'tools.Connector',
+        do_debug: bool = False
     ) -> None:
         self.__DATABASE_HOST = host
         self.__DATABASE_USER = username
@@ -31,6 +32,7 @@ class Connector:
         self.__user = user
         self.type_dict.update(dict(zip([f'varchar({i})' for i in range(
             1, self.MAX_VARCHAR + 1)], ['str'] * self.MAX_VARCHAR)))
+        self.__debug = do_debug
 
     def __establish_connection(self, is_init=True):
         if not is_init:
@@ -395,8 +397,13 @@ class Connector:
         table_dtype = dict([row[:2] for row in table_describe])
 
         # CHECK REQUIRED COLUMN
-        table_req = [row[0] for row in table_describe if row[2] == 'NO']
+
+        table_req = [row[0] for row in table_describe if row[2]
+                     == 'NO' and 'auto_increment' not in row[5]]
         cols_missing = [col for col in table_req if col not in columns]
+        if self.__debug:
+            print(table_describe)
+            print(table_req)
         if cols_missing:
             raise KeyError(f'Missing not null columns: {cols_missing}.')
 
