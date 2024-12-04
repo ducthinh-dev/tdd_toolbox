@@ -657,7 +657,7 @@ class MSSQLConnector:
             types=type_list, values=insert_values)
         stmt = (
             f'insert into {table} ({", ".join(columns)}) '
-            f'values ({self.__make_ph(length_insert)});'
+            f'values {self.__make_ph(length_insert)};'
         )
         is_inserted = self.query_many(query=stmt, params=values_adapted)
         return len(values_adapted) if is_inserted else 0
