@@ -18,7 +18,7 @@ class MailSender:
 
     def __create_mime_object(self, receivers: list[str], subject: str, content: str, content_type: str,
                              cc_receivers: list[str] = [], bcc_receivers: list[str] = [],
-                             attachments: str = ''):
+                             attachments: str = '', embedded_images: dict = {}):
         message = MIMEMultipart()
         message["Subject"] = subject
         message["From"] = self.sender
@@ -29,25 +29,42 @@ class MailSender:
         if bcc_receivers:
             message["Bcc"] = ",".join(bcc_receivers)
         message.attach(MIMEText(content, content_type))
+
+        # Handle attachments
         if attachments:
             for filename in attachments:
                 mimetype, _ = guess_type(filename)
                 if not mimetype:
                     continue
                 mimetype = mimetype.split('/', 1)
-                fp = open(filename, 'rb')
-                attachment = MIMEBase(mimetype[0], mimetype[1])
-                attachment.set_payload(fp.read())
-                fp.close()
+                with open(filename, 'rb') as fp:
+                    attachment = MIMEBase(mimetype[0], mimetype[1])
+                    attachment.set_payload(fp.read())
                 encode_base64(attachment)
                 attachment.add_header('Content-Disposition', 'attachment',
                                       filename=os.path.basename(filename))
                 message.attach(attachment)
+
+        # Handle embedded images
+        for cid, img_path in embedded_images.items():
+            mimetype, _ = guess_type(img_path)
+            if not mimetype:
+                continue
+            mimetype = mimetype.split('/', 1)
+            with open(img_path, 'rb') as fp:
+                img = MIMEBase(mimetype[0], mimetype[1])
+                img.set_payload(fp.read())
+            encode_base64(img)
+            img.add_header('Content-ID', f'<{cid}>')
+            img.add_header('Content-Disposition', 'inline',
+                           filename=os.path.basename(img_path))
+            message.attach(img)
+
         return message
 
     def send_email(self, subject: str, content: str, content_type: str = "plain",
                    receivers: list[str] = [], cc_receivers: list[str] = [], bcc_receivers: list[str] = [],
-                   attachments: str = '') -> bool:
+                   attachments: str = '', embedded_images: dict = {}) -> bool:
         message = self.__create_mime_object(
             receivers=receivers,
             cc_receivers=cc_receivers,
@@ -55,7 +72,8 @@ class MailSender:
             subject=subject,
             content=content,
             content_type=content_type,
-            attachments=attachments
+            attachments=attachments,
+            embedded_images=embedded_images
         )
         receivers = receivers + cc_receivers + bcc_receivers
         with smtplib.SMTP(self.host, self.port) as server:
