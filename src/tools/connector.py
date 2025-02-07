@@ -447,6 +447,7 @@ class Connector:
 class MSSQLConnector:
     type_dict = {
         'text': 'str',
+        'date': 'str',
         'datetime': 'str',
         'timestamp': 'str',
         'float': 'float',
