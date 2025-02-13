@@ -449,6 +449,7 @@ class MSSQLConnector:
         'text': 'str',
         'date': 'str',
         'datetime': 'str',
+        'datetime2': 'str',
         'timestamp': 'str',
         'float': 'float',
         'tinyint': 'int',
