@@ -35,12 +35,11 @@ class Downloader:
         - str: The file path where the downloaded file is saved.
         '''
         file_ext = url.split('.')[-1]
-        file_name = f'{name}.{file_ext}' if name else url.split(
-            '/')[-1].split('.')[0]
+        file_name = f'{name}.{file_ext}' if name else url.split('/')[-1]
         file_path = f'{self.storage}{file_name}'
 
         if os.path.isfile(file_path) and not is_overwritten:
-            raise FileExistsError(f'File name ({name}) already exists.')
+            raise FileExistsError(f'File name ({file_name}) already exists.')
 
         if os.path.isfile(file_path) and is_overwritten:
             os.remove(file_path)
