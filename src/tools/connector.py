@@ -485,18 +485,22 @@ class MSSQLConnector:
         self.__conn.close()
         self.__establish_conn()
 
-    def query(self, query: str):
+    def query(self, query: str, do_get: bool = True):
         try:
             with self.__conn.cursor() as cursor:
                 cursor.execute(query)
-                rows = cursor.fetchall()
-                columns = [col[0] for col in cursor.description]
+                if do_get:
+                    rows = cursor.fetchall()
+                    columns = [col[0] for col in cursor.description]
+
         except Exception as err:
             self.refresh_conn()
             print(query)
             raise err
 
-        return columns, rows
+        if do_get:
+            return columns, rows
+        return 1
 
     def query_params(self, query: str, params: any, do_get: bool = True):
         try:
