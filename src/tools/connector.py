@@ -490,7 +490,7 @@ class MSSQLConnector:
             with self.__conn.cursor() as cursor:
                 cursor.execute(query)
                 if do_get:
-                    rows = cursor.fetchall()
+                    rows = [tuple(row) for row in cursor.fetchall()]
                     columns = [col[0] for col in cursor.description]
 
         except Exception as err:
@@ -507,7 +507,7 @@ class MSSQLConnector:
             with self.__conn.cursor() as cursor:
                 cursor.execute(query, params)
                 if do_get:
-                    rows = cursor.fetchall()
+                    rows = [tuple(row) for row in cursor.fetchall()]
                     columns = [col[0] for col in cursor.description]
         except Exception as err:
             self.refresh_conn()
