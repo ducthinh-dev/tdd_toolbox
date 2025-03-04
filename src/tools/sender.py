@@ -85,3 +85,33 @@ class MailSender:
                 self.sender, receivers, message.as_string()
             )
         return True
+
+
+def get_recipients(conn, code):
+    query_recipient = '''
+        select recipient_mail, receive_type  
+        from MailRecipients
+        where mail_code in ('*', '{job_code}');
+    '''
+    
+    _, data = conn.query_data(query=query_recipient.format(
+        job_code=code
+    ))
+    list_to = []
+    list_cc = []
+    list_bcc = []
+    for email, rec_type in data:
+        match rec_type:
+            case 0:
+                list_to.append(email)
+            case 1:
+                list_cc.append(email)
+            case 2:
+                list_bcc.append(email)
+            case _:
+                list_bcc.append(email)
+    return {
+        'to': list_to,
+        'cc': list_cc,
+        'bcc': list_bcc
+    }
