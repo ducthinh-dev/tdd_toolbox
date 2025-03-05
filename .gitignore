@@ -3,4 +3,6 @@
 toolbox.code-workspace
 __pycache__/
 test/
+tests/
 .pytest_cache
+test.*
