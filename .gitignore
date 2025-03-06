@@ -6,3 +6,4 @@ test/
 tests/
 .pytest_cache
 test.*
+*.log

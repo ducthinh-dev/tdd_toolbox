@@ -5,9 +5,19 @@ import logging.config
 import os
 
 
-def handle_error(e: Exception) -> str:
-    tb_lines = traceback.format_exception(type(e), e, e.__traceback__)
-    return ''.join(tb_lines)
+def handle_error(e: Exception, msg_type='long') -> str:
+    match msg_type:
+        case 'long':
+            tb_lines = traceback.format_exception(type(e), e, e.__traceback__)
+            return ''.join(tb_lines)
+        case 'short':
+            return f"{type(e).__name__}: {e}"
+        case _:
+            return {
+                'type': type(e).__name__,
+                'message': str(e),
+                'traceback': traceback.format_exception(type(e), e, e.__traceback__)
+            }
 
 
 def setup_logger(name: str, log_path: str) -> logging.Logger:
