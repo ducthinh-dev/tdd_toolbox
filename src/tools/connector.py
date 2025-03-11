@@ -11,6 +11,7 @@ class Connector:
         'datetime': 'str',
         'timestamp': 'str',
         'double': 'float',
+        'float': 'float',
         'tinyint': 'int',
         'int': 'int',
         'bigint': 'int',
@@ -28,7 +29,7 @@ class Connector:
         self.__DATABASE_HOST = host
         self.__DATABASE_USER = username
         self.__DATABASE_PASSWORD = password
-        self.__DATABASE_SCHEMA = schema
+        self.SCHEMA = schema
         self.__connection = self.__establish_connection()
         self.__user = user
         self.type_dict.update(dict(zip([f'varchar({i})' for i in range(
@@ -43,7 +44,7 @@ class Connector:
             password=self.__DATABASE_PASSWORD,
             host=self.__DATABASE_HOST,
             port=3306,
-            database=self.__DATABASE_SCHEMA,
+            database=self.SCHEMA,
             buffered=True
         )
         return connection
@@ -55,7 +56,7 @@ class Connector:
         self.__connection.close()
 
     def return_connection_string(self):
-        return f"mysql+mysqlconnector://{self.__DATABASE_USER}:{self.__DATABASE_PASSWORD}@{self.__DATABASE_HOST}/{self.__DATABASE_SCHEMA}"
+        return f"mysql+mysqlconnector://{self.__DATABASE_USER}:{self.__DATABASE_PASSWORD}@{self.__DATABASE_HOST}/{self.SCHEMA}"
 
     @staticmethod
     def handle_conditions(conditions: list = [], is_or: bool = True):
@@ -90,6 +91,32 @@ class Connector:
             [f"{con['column']} {ops[con['operator']]} {con['value']}" for con in conditions])
         return "WHERE " + con_str
 
+    @staticmethod
+    def __handle_conditions(conditions: list[dict]):
+        stmt = 'where'
+        params_list = []
+        ops = {
+            "eq": "=",
+            "gt": ">",
+            "lt": "<",
+            "gq": ">=",
+            "lq": "<=",
+            "ne": "!="
+        }
+        condition_string = ''
+        for this_group in conditions:
+            this_group_string = ''
+            for condition in this_group:
+                this_cond = f'{condition["column"]} {ops[condition["operator"]]} %s'
+                params_list.append(condition["value"])
+                this_cond = f'({this_cond})'
+                this_group_string = f'{this_group_string} and {this_cond}' if this_group_string else this_cond
+
+            this_group_string = f'({this_group_string})'
+            condition_string = f'{condition_string} or {this_group_string}' if condition_string else this_group_string
+
+        return (f'{stmt} {condition_string}', params_list)
+
     def query_data(self, query: str, params: list = []):
         """
         #### Return: 
@@ -102,6 +129,17 @@ class Connector:
                 raw_columns = cursor.column_names
                 self.__connection.commit()
             return (raw_columns, raw_data)
+        except connector.Error as error:
+            self.__connection.rollback()
+            print(f"Oh no, {error}.")
+            return (False, error)
+
+    def execute(self, stmt: str, params: list = []):
+        try:
+            with self.__connection.cursor(buffered=True) as cursor:
+                cursor.execute(f'/* {self.__user} */ ' + stmt, params=params)
+                self.__connection.commit()
+            return 1
         except connector.Error as error:
             self.__connection.rollback()
             print(f"Oh no, {error}.")
@@ -190,6 +228,50 @@ class Connector:
             )
             with self.__connection.cursor() as cursor:
                 cursor.execute(statement, update_value)
+                self.__connection.commit()
+        except connector.Error as error:
+            self.__connection.rollback()
+            print(error,
+                  sep="\n")
+            return statement
+        return
+
+    def update(self, table: str, conditions: list[list[dict]], updates: list[tuple]):
+        """
+        conditions:
+        ```
+        [
+            [
+                {
+                    "column": column_name,
+                    "value": value,
+                    "operator": operator
+                }, ...
+            ],
+            [
+                {
+                    "column": column_name,
+                    "value": value,
+                    "operator": operator
+                }, ...
+            ],
+        ]
+        ```
+        operator list: `eq`: `=`, `gt`: `>`, `lt`: `<`, `gq`: `>=`, `lq`: `<=`, `ne`: `!=`
+        """
+        try:
+            update_cols = [update[0] for update in updates]
+            update_value = [update[1] for update in updates]
+
+            con_str, params = self.__handle_conditions(conditions=conditions)
+            statement = (
+                f"/* {self.__user} */ "
+                f"UPDATE {table} "
+                f"SET {self._make_update(update_cols)} "
+                f"{con_str};"
+            )
+            with self.__connection.cursor() as cursor:
+                cursor.execute(statement, update_value + params)
                 self.__connection.commit()
         except connector.Error as error:
             self.__connection.rollback()
