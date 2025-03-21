@@ -71,3 +71,16 @@ def setup_logger(name: str, log_path: str) -> logging.Logger:
     logger.addHandler(file_handler)
 
     return logger
+
+
+def load_config(conn, code):
+    qry_config = '''
+        select config_value
+        from ReportConfig
+        where config_name = '{code}';
+    '''
+    _, raw_config = conn.query_data(qry_config.format(code=code))
+    root_path = raw_config[0][0]
+    if not root_path:
+        raise Exception(f'{code} does not exist.')
+    return root_path
