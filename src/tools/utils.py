@@ -6,17 +6,17 @@ import os
 
 
 def handle_error(e: Exception, msg_type='long') -> str:
+    traceback = ''.join(traceback.format_exception(type(e), e, e.__traceback__))
     match msg_type:
         case 'long':
-            tb_lines = traceback.format_exception(type(e), e, e.__traceback__)
-            return ''.join(tb_lines)
+            return ''.join(traceback)
         case 'short':
             return f"{type(e).__name__}: {e}"
         case _:
             return {
                 'type': type(e).__name__,
                 'message': str(e),
-                'traceback': traceback.format_exception(type(e), e, e.__traceback__)
+                'traceback': traceback
             }
 
 
