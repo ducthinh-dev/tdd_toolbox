@@ -3,6 +3,7 @@ import logging
 import logging.handlers
 import logging.config
 import os
+from datetime import datetime 
 
 
 def handle_error(e: Exception, msg_type='long') -> str:
@@ -84,3 +85,8 @@ def load_config(conn, code):
     if not root_path:
         raise Exception(f'{code} does not exist.')
     return root_path
+
+def log_time(ms_digits = 3):
+    current = datetime.now()
+    stamp = f"{current.strftime('%Y-%m-%d %H:%M:%S')}.{current.strftime('%f')[:ms_digits]}"
+    return stamp
