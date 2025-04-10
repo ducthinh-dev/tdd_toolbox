@@ -55,6 +55,9 @@ class Connector:
     def close_connection(self):
         self.__connection.close()
 
+    def get_core(self):
+        return self.__connection
+
     def return_connection_string(self):
         return f"mysql+mysqlconnector://{self.__DATABASE_USER}:{self.__DATABASE_PASSWORD}@{self.__DATABASE_HOST}/{self.SCHEMA}"
 
