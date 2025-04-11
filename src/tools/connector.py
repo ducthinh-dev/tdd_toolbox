@@ -541,7 +541,9 @@ class MSSQLConnector:
         'int': 'int',
         'bigint': 'int',
         'varchar': 'str',
-        'nvarchar': 'str'
+        'nvarchar': 'str',
+        'text': 'str',
+        'ntext': 'str',
     }
 
     DESCR_NAME_IDX = 3
