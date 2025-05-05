@@ -1,4 +1,5 @@
-mysql-connector-python==9.0.0
-setuptools==65.5.0
+mysql-connector-python
+setuptools
 pyodbc
-SQLAlchemy==2.0.35
+SQLAlchemy
+logfire
