@@ -1,9 +1,11 @@
 import traceback
 import logging
+from logging import WARNING
 import logging.handlers
-import logging.config
 import os
-from datetime import datetime 
+from dotenv import load_dotenv
+import logfire
+from datetime import datetime
 
 
 def handle_error(e: Exception, msg_type='long') -> str:
@@ -21,7 +23,7 @@ def handle_error(e: Exception, msg_type='long') -> str:
             }
 
 
-def setup_logger(name: str, log_path: str) -> logging.Logger:
+def setup_logger(name: str, log_path: str, use_logfire: bool = False) -> logging.Logger:
     """
     Sets up a logger with specified configurations.
 
@@ -71,6 +73,13 @@ def setup_logger(name: str, log_path: str) -> logging.Logger:
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
 
+    if use_logfire:
+        load_dotenv()
+        LOGFIRE_TOKEN = os.environ.get('LOGFIRE_TOKEN')
+        logfire.configure(token=LOGFIRE_TOKEN)
+        logfire.LogfireLoggingHandler()
+        logger.addHandler(logfire.LogfireLoggingHandler(level=WARNING))
+
     return logger
 
 
@@ -86,7 +95,8 @@ def load_config(conn, code):
         raise Exception(f'{code} does not exist.')
     return root_path
 
-def log_time(ms_digits = 3):
+
+def log_time(ms_digits=3):
     current = datetime.now()
     stamp = f"{current.strftime('%Y-%m-%d %H:%M:%S')}.{current.strftime('%f')[:ms_digits]}"
     return stamp
