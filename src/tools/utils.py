@@ -100,3 +100,7 @@ def log_time(ms_digits=3):
     current = datetime.now()
     stamp = f"{current.strftime('%Y-%m-%d %H:%M:%S')}.{current.strftime('%f')[:ms_digits]}"
     return stamp
+
+
+def stamp(msg: str):
+    print(f'[{log_time()}] {msg}')
