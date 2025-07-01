@@ -343,7 +343,7 @@ class Connector:
     def _make_ph(num: int):
         return '(' + ', '.join(['%s']*num) + ')'
 
-    def insert(self, table: str, columns: dict, values: list[tuple], new_col: bool = False, do_replace: bool = False):
+    def insert(self, table: str, columns: dict, values: list[tuple], new_col: bool = False, do_replace: bool = False, get_ids: bool = False):
         """
         Insert data into the specified table.
 
@@ -417,6 +417,20 @@ class Connector:
             f"values "
             f"{self._make_ph(len(columns))};"
         )
+        if get_ids:
+            insert_ids = []
+            for value in values:
+                try:
+                    with self.__connection.cursor() as cursor:
+                        cursor.execute(statement, params=value)
+                        insert_ids.append(cursor.lastrowid)
+                        self.__connection.commit()
+                except Exception as error:
+                    self.__connection.rollback()
+                    insert_ids.append(None)
+                    print(error, statement, sep='\n')
+                
+            return insert_ids
         try:
             with self.__connection.cursor() as cursor:
                 cursor.executemany(statement, seq_params=values)
