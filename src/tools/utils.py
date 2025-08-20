@@ -6,6 +6,8 @@ import os
 from dotenv import load_dotenv
 import logfire
 from datetime import datetime
+import random
+import string
 
 
 def handle_error(e: Exception, msg_type='long') -> str:
@@ -104,3 +106,19 @@ def log_time(ms_digits=3):
 
 def stamp(msg: str):
     print(f'[{log_time()}] {msg}')
+
+
+def random_filename(length=12):
+    """
+    Generate a random filename with letters and numbers.
+
+    Args:
+        length (int): Length of the random part of the filename.
+        ext (str): File extension (default: ".jpg").
+
+    Returns:
+        str: Random filename.
+    """
+    chars = string.ascii_letters + string.digits
+    name = ''.join(random.choices(chars, k=length))
+    return name
