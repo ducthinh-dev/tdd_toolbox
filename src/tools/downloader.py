@@ -90,9 +90,9 @@ class DownloaderV2:
         if not content_type:
             content_type = '.jpg'
 
-        name = random_filename if not name else name
+        name = random_filename() if not name else name
         file_name = f'{name}{content_type}'
-        file_path = self.storage.joinpath(file_name)
+        file_path = self.storage.joinpath(f'./{file_name}')
 
         if os.path.isfile(file_path) and not is_overwritten:
             raise FileExistsError(f'File name ({file_name}) already exists.')
