@@ -16,7 +16,8 @@ dependencies = [
     "pyodbc",
     "aiohttp",
     "logfire",
-    "python-dotenv"
+    "python-dotenv",
+    "pillow",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

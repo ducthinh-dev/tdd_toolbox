@@ -3,3 +3,4 @@ setuptools
 pyodbc
 SQLAlchemy
 logfire
+pillow
