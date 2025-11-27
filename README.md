@@ -110,3 +110,7 @@ mailer.send_email(
     embedded_images={'image_id': 'path/to/image'}
 )
 ```
+
+### Some utilities
+- `handle_error`: handle Exception for logging
+- `stamp`: get time stamp for logging
